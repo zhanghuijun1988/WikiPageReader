@@ -14,7 +14,7 @@ public class WikiReadTask {
 	private Long startTime = 0l;
 	private Long endTime = 0l;
 
-	public synchronized void doGet(int index) {
+	public synchronized void doGet(int index, boolean printLog) {
 		startTime = System.currentTimeMillis();
 		try {
 			// create connection
@@ -29,14 +29,17 @@ public class WikiReadTask {
 			}
 
 			// print response from input stream
-			BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			StringBuffer sb = new StringBuffer();
-			String inputLine;
-			
-			while ((inputLine = br.readLine()) != null) {
-				sb.append(inputLine);	//sb has the response content, which can be used for debugging/logging purpose
-			}			
-			br.close();
+			if(printLog && index == 0) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				StringBuffer sb = new StringBuffer();
+				String inputLine;
+				
+				while ((inputLine = br.readLine()) != null) {
+					sb.append(inputLine);	//sb has the response content, which can be used for debugging/logging purpose
+				}
+				System.out.println("Thread " + index + " - Response Page Content: " + sb.toString());
+				br.close();
+			}
 
 		} catch (Exception e) {
 			// Exception case, do proper logging
@@ -44,11 +47,11 @@ public class WikiReadTask {
 		} finally {
 			// calculate response time for all cases
 			endTime = System.currentTimeMillis();
-			calculateTime(index);
+			calculateTime(index, printLog);
 		}
 	}
 
-	public synchronized void calculateTime(int index) {
+	public synchronized void calculateTime(int index, boolean printLog) {
 		responseTime = endTime - startTime;
 		System.out.println("Thread " + index + " - Response Time:  " + responseTime);
 	}
